@@ -10,6 +10,19 @@ Ask your assistant things like:
 - "Find this week's most viewed videos about web scraping."
 - "What are people saying in the comments of this video?"
 
+## Without installing anything
+
+The same seven tools are also served from a hosted MCP server at `https://pipefetch.com/mcp`. If your
+tool can connect to a remote server over HTTP, point it there and send your key in the `x-api-key`
+header. In Claude Code:
+
+```bash
+claude mcp add --transport http pipefetch https://pipefetch.com/mcp --header "x-api-key: pf_your_key"
+```
+
+The [MCP guide](https://pipefetch.com/guides/youtube-mcp-server-claude-cursor) has the block for Cursor.
+Use this package when your tool starts MCP servers as a local program, as Claude Desktop does.
+
 ## Setup
 
 1. Create an API key at [pipefetch.com/dashboard](https://pipefetch.com/dashboard). A new account
