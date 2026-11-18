@@ -1,13 +1,13 @@
 /**
  * The Pipefetch MCP server: tools that give an AI assistant YouTube transcripts, video details, channels,
- * search results and comments, and the contact details and brand a company's website publishes, through
- * the Pipefetch API (https://pipefetch.com).
+ * search results and comments, the contact details and brand a company's website publishes, and public
+ * Instagram profiles, through the Pipefetch API (https://pipefetch.com).
  */
 import { McpServer } from '@modelcontextprotocol/server';
 import Pipefetch, { PipefetchError } from 'pipefetch';
 import * as z from 'zod/v4';
 
-export const VERSION = '0.2.0';
+export const VERSION = '0.3.0';
 
 const video = z.string().describe('A YouTube video ID or any YouTube video URL.');
 const channel = z.string().describe('A channel handle (@mkbhd), a channel ID (UC...) or any channel URL.');
@@ -41,6 +41,13 @@ function brandText(data) {
   if (typeof url !== 'string' || !url.startsWith('data:')) return JSON.stringify(data, null, 2);
   const note = `(inline SVG, about ${Math.max(1, Math.round((url.length * 0.75) / 1024))} KB, left out here; GET /v1/web/brand returns it as a data: URI)`;
   return JSON.stringify({ ...data, logo: { ...data.logo, url: note } }, null, 2);
+}
+
+/** A profile as JSON without the media addresses: long signed links a model cannot open and would only pay to read. */
+function instagramText(data) {
+  const posts = Array.isArray(data?.latestPosts) ? data.latestPosts.map(({ imageUrl, videoUrl, ...post }) => post) : [];
+  const { profilePicUrl, ...profile } = data ?? {};
+  return JSON.stringify({ ...profile, latestPosts: posts }, null, 2);
 }
 
 /**
@@ -197,6 +204,21 @@ export function buildServer(env = process.env) {
       annotations,
     },
     ({ url }) => answer((pf) => pf.websiteBrand(url), brandText),
+  );
+
+  server.registerTool(
+    'instagram_profile',
+    {
+      title: 'Instagram profile',
+      description:
+        'Get a public Instagram account: exact follower, following and post counts, bio, links, emails and phones in the bio, verified and private flags, account type, engagement rate, and its latest posts and Reels with likes, comments and plays. Costs 2 Pipefetch credits; an account that does not exist costs nothing.',
+      inputSchema: z.object({
+        username: z.string().describe('An Instagram username (nasa), handle (@nasa) or profile URL.'),
+        posts: z.boolean().optional().describe('Include the latest posts and Reels. Default true; false gives a much shorter answer for the same price.'),
+      }),
+      annotations,
+    },
+    ({ username, posts }) => answer((pf) => pf.instagramProfile(username, { posts }), instagramText),
   );
 
   return server;

@@ -1,8 +1,8 @@
 # pipefetch-mcp
 
 An MCP server that gives Claude, Cursor and other AI tools access to YouTube (transcripts, video
-details, channels, search and comments) and to what a company's website publishes: its contact details
-and its brand. It uses the [Pipefetch API](https://pipefetch.com).
+details, channels, search and comments), to what a company's website publishes (its contact details
+and its brand) and to public Instagram profiles. It uses the [Pipefetch API](https://pipefetch.com).
 
 Ask your assistant things like:
 
@@ -12,6 +12,7 @@ Ask your assistant things like:
 - "What are people saying in the comments of this video?"
 - "Find the contact email and the LinkedIn page of apify.com."
 - "What are the brand colors and the font of stripe.com?"
+- "How many followers does @nasa have on Instagram, and what did it post this week?"
 
 ## Without installing anything
 
@@ -70,14 +71,16 @@ Restart the tool afterwards. The tools below should appear in its tool list.
 | `youtube_comments` | Top or newest comments of a video, up to 100 | 1 per started 20 |
 | `website_contacts` | The emails, phone numbers and social profiles a website publishes, its contact page and address | 1 |
 | `website_brand` | A company's name, logo, icon, brand colors, fonts and social profiles, from its website | 1 |
+| `instagram_profile` | A public Instagram account: exact followers, bio, links, engagement, latest posts and Reels | 2 |
 
 All tools only read public data. Videos can be given as an ID or any YouTube URL; channels as a
 handle (`@mkbhd`), a channel ID or a channel URL; websites as a domain (`stripe.com`) or any address on
-the site.
+the site; Instagram accounts as a username, a handle or a profile URL.
 
 ## What it costs
 
-Each tool call is one Pipefetch request and uses credits from your account: usually 1. Requests
+Each tool call is one Pipefetch request and uses credits from your account: usually 1, and 2 for an
+Instagram profile. Requests
 that find nothing (a video without captions, an empty search, comments turned off, a website that
 cannot be read or shows no contacts) cost nothing.
 Credits are prepaid, from $9 for 3,000, and never expire. See [pricing](https://pipefetch.com/pricing).
@@ -87,13 +90,14 @@ is one call for the list; reading all ten transcripts would be ten more.
 
 ## Good to know
 
-- Every answer is fetched live from YouTube or from the website you name, so a call takes a few seconds.
+- Every answer is fetched live from YouTube, Instagram or the website you name, so a call takes a few
+  seconds.
 - A transcript exists only if the video has captions, uploaded or automatic.
 - Lists are one page: the latest 30 uploads, up to 40 search results, up to 100 comments.
 - Your API key stays on your computer, in your tool's configuration. Anyone who has it can spend
   its credits.
 - Pipefetch is an independent service. It is not affiliated with, endorsed by or sponsored by
-  YouTube or Google.
+  YouTube, Google, Instagram or Meta.
 
 ## Links
 

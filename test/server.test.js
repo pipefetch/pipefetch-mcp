@@ -29,6 +29,12 @@ async function fakeApi() {
         credits: { used: 1, remaining: 99 },
       });
     }
+    if (url.pathname === '/v1/instagram/profile') {
+      return send(200, {
+        data: { username: url.searchParams.get('username'), followerCount: 104323046, profilePicUrl: 'https://cdn.example/pic.jpg', latestPosts: [{ shortCode: 'abc', likeCount: 5, imageUrl: 'https://cdn.example/a.jpg', videoUrl: null }] },
+        credits: { used: 2, remaining: 95 },
+      });
+    }
     if (url.pathname === '/v1/web/brand') {
       return send(200, { data: { name: 'Acme', domain: url.searchParams.get('url'), logo: { url: `data:image/svg+xml;base64,${'A'.repeat(4000)}`, format: 'svg', source: 'header' } }, credits: { used: 1, remaining: 97 } });
     }
@@ -94,7 +100,7 @@ test('the server introduces itself and lists its tools, also without an API key'
     const { result } = await server.request('tools/list');
     assert.deepEqual(
       result.tools.map((tool) => tool.name).sort(),
-      ['website_brand', 'website_contacts', 'youtube_channel', 'youtube_channel_shorts', 'youtube_channel_videos', 'youtube_comments', 'youtube_search', 'youtube_transcript', 'youtube_video'],
+      ['instagram_profile', 'website_brand', 'website_contacts', 'youtube_channel', 'youtube_channel_shorts', 'youtube_channel_videos', 'youtube_comments', 'youtube_search', 'youtube_transcript', 'youtube_video'],
     );
     for (const tool of result.tools) {
       assert.ok(tool.description.includes('credit'), `${tool.name} says what it costs`);
@@ -147,6 +153,11 @@ test('tools call the API with the key and hand back readable answers and errors'
     assert.equal(JSON.parse(brand.result.content[0].text).name, 'Acme');
     assert.match(brand.result.content[0].text, /inline SVG, about 3 KB/);
     assert.ok(!brand.result.content[0].text.includes('AAAA'));
+
+    // An Instagram profile comes back without its media addresses.
+    const profile = await server.request('tools/call', { name: 'instagram_profile', arguments: { username: '@nasa' } });
+    assert.deepEqual(JSON.parse(profile.result.content[0].text), { username: '@nasa', followerCount: 104323046, latestPosts: [{ shortCode: 'abc', likeCount: 5 }] });
+    assert.equal(api.asked.at(-1).path, '/v1/instagram/profile');
 
     // An input that breaks the tool's rules never reaches the API.
     const before = api.asked.length;
