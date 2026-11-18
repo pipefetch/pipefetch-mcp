@@ -1,7 +1,7 @@
 {
   "name": "pipefetch-mcp",
-  "version": "0.1.0",
-  "description": "MCP server for the Pipefetch API: YouTube transcripts, video details, channels, search and comments for Claude, Cursor and other AI tools.",
+  "version": "0.2.0",
+  "description": "MCP server for the Pipefetch API: YouTube transcripts, videos, channels, search and comments, plus website contacts and brand data, for Claude, Cursor and other AI tools.",
   "mcpName": "io.github.pipefetch/pipefetch-mcp",
   "type": "module",
   "bin": {
@@ -18,7 +18,7 @@
   },
   "dependencies": {
     "@modelcontextprotocol/server": "^2.4.0",
-    "pipefetch": "^0.1.1",
+    "pipefetch": "^0.2.0",
     "zod": "^4.2.0"
   },
   "keywords": [

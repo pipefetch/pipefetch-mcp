@@ -1,15 +1,17 @@
 /**
- * The Pipefetch MCP server: seven tools that give an AI assistant YouTube transcripts, video details,
- * channels, search results and comments through the Pipefetch API (https://pipefetch.com).
+ * The Pipefetch MCP server: tools that give an AI assistant YouTube transcripts, video details, channels,
+ * search results and comments, and the contact details and brand a company's website publishes, through
+ * the Pipefetch API (https://pipefetch.com).
  */
 import { McpServer } from '@modelcontextprotocol/server';
 import Pipefetch, { PipefetchError } from 'pipefetch';
 import * as z from 'zod/v4';
 
-export const VERSION = '0.1.0';
+export const VERSION = '0.2.0';
 
 const video = z.string().describe('A YouTube video ID or any YouTube video URL.');
 const channel = z.string().describe('A channel handle (@mkbhd), a channel ID (UC...) or any channel URL.');
+const website = z.string().describe('A website address or bare domain, such as "stripe.com". The site at that host is read; a path is ignored.');
 /** These tools only read public data and reach out to the internet. */
 const annotations = { readOnlyHint: true, openWorldHint: true };
 
@@ -28,6 +30,17 @@ function transcriptText(data) {
     lines.push(`Chapters: ${data.chapters.map((c) => `${seconds(c.startSeconds)} ${c.title}`).join('; ')}`);
   }
   return `${lines.join('\n')}\n\n${data.text}`;
+}
+
+/**
+ * A brand as JSON, without the picture: a logo drawn as inline SVG arrives as a data: URI of up to
+ * 100 KB of base64, which a model cannot look at and would only pay to read.
+ */
+function brandText(data) {
+  const url = data?.logo?.url;
+  if (typeof url !== 'string' || !url.startsWith('data:')) return JSON.stringify(data, null, 2);
+  const note = `(inline SVG, about ${Math.max(1, Math.round((url.length * 0.75) / 1024))} KB, left out here; GET /v1/web/brand returns it as a data: URI)`;
+  return JSON.stringify({ ...data, logo: { ...data.logo, url: note } }, null, 2);
 }
 
 /**
@@ -157,6 +170,33 @@ export function buildServer(env = process.env) {
       annotations,
     },
     ({ video: id, limit, sort }) => answer((pf) => pf.comments(id, { limit, sort })),
+  );
+
+  server.registerTool(
+    'website_contacts',
+    {
+      title: 'Website contact details',
+      description:
+        'Get the contact details a company publishes on its own website: emails, phone numbers, social profiles, contact page, address and company name. Reads the home page and the contact, imprint and about pages; nothing is guessed. Costs 1 Pipefetch credit; a website with no contact details, or one that cannot be read, costs nothing.',
+      inputSchema: z.object({
+        url: website,
+        pages: z.number().int().min(1).max(10).optional().describe('How many pages of the site to read: 1 to 10. Default 5.'),
+      }),
+      annotations,
+    },
+    ({ url, pages }) => answer((pf) => pf.websiteContacts(url, { pages })),
+  );
+
+  server.registerTool(
+    'website_brand',
+    {
+      title: 'Website brand',
+      description:
+        'Get a company\'s brand from its website: name, logo, icon, brand colors, fonts, description and social profiles. Costs 1 Pipefetch credit; a website that cannot be read costs nothing.',
+      inputSchema: z.object({ url: website }),
+      annotations,
+    },
+    ({ url }) => answer((pf) => pf.websiteBrand(url), brandText),
   );
 
   return server;

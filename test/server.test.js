@@ -29,6 +29,12 @@ async function fakeApi() {
         credits: { used: 1, remaining: 99 },
       });
     }
+    if (url.pathname === '/v1/web/brand') {
+      return send(200, { data: { name: 'Acme', domain: url.searchParams.get('url'), logo: { url: `data:image/svg+xml;base64,${'A'.repeat(4000)}`, format: 'svg', source: 'header' } }, credits: { used: 1, remaining: 97 } });
+    }
+    if (url.pathname === '/v1/web/contacts') {
+      return send(200, { data: { domain: url.searchParams.get('url'), primaryEmail: 'hello@acme.com' }, credits: { used: 1, remaining: 96 } });
+    }
     return send(200, { data: { query: url.searchParams.get('q'), results: [{ title: 'A result', viewCount: 7 }] }, credits: { used: 1, remaining: 98 } });
   });
   await new Promise((resolve) => http.listen(0, '127.0.0.1', resolve));
@@ -80,7 +86,7 @@ function startServer(env) {
   };
 }
 
-test('the server introduces itself and lists its seven tools, also without an API key', async () => {
+test('the server introduces itself and lists its tools, also without an API key', async () => {
   const server = startServer({});
   try {
     const hello = await server.handshake();
@@ -88,7 +94,7 @@ test('the server introduces itself and lists its seven tools, also without an AP
     const { result } = await server.request('tools/list');
     assert.deepEqual(
       result.tools.map((tool) => tool.name).sort(),
-      ['youtube_channel', 'youtube_channel_shorts', 'youtube_channel_videos', 'youtube_comments', 'youtube_search', 'youtube_transcript', 'youtube_video'],
+      ['website_brand', 'website_contacts', 'youtube_channel', 'youtube_channel_shorts', 'youtube_channel_videos', 'youtube_comments', 'youtube_search', 'youtube_transcript', 'youtube_video'],
     );
     for (const tool of result.tools) {
       assert.ok(tool.description.includes('credit'), `${tool.name} says what it costs`);
@@ -132,6 +138,15 @@ test('tools call the API with the key and hand back readable answers and errors'
     const search = await server.request('tools/call', { name: 'youtube_search', arguments: { query: 'web scraping', sort: 'newest', limit: 5 } });
     assert.deepEqual(JSON.parse(search.result.content[0].text), { query: 'web scraping', results: [{ title: 'A result', viewCount: 7 }] });
     assert.deepEqual(api.asked.at(-1), { path: '/v1/youtube/search', query: { q: 'web scraping', sort: 'newest', limit: '5' }, key: 'pf_test' });
+
+    // The website tools pass the address on, and a logo drawn as inline SVG is described, not dumped on the model.
+    const contacts = await server.request('tools/call', { name: 'website_contacts', arguments: { url: 'acme.com', pages: 3 } });
+    assert.deepEqual(JSON.parse(contacts.result.content[0].text), { domain: 'acme.com', primaryEmail: 'hello@acme.com' });
+    assert.deepEqual(api.asked.at(-1), { path: '/v1/web/contacts', query: { url: 'acme.com', pages: '3' }, key: api.asked.at(-1).key });
+    const brand = await server.request('tools/call', { name: 'website_brand', arguments: { url: 'acme.com' } });
+    assert.equal(JSON.parse(brand.result.content[0].text).name, 'Acme');
+    assert.match(brand.result.content[0].text, /inline SVG, about 3 KB/);
+    assert.ok(!brand.result.content[0].text.includes('AAAA'));
 
     // An input that breaks the tool's rules never reaches the API.
     const before = api.asked.length;

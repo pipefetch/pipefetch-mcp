@@ -1,7 +1,8 @@
 # pipefetch-mcp
 
-An MCP server that gives Claude, Cursor and other AI tools access to YouTube: transcripts, video
-details, channels, search and comments. It uses the [Pipefetch API](https://pipefetch.com).
+An MCP server that gives Claude, Cursor and other AI tools access to YouTube (transcripts, video
+details, channels, search and comments) and to what a company's website publishes: its contact details
+and its brand. It uses the [Pipefetch API](https://pipefetch.com).
 
 Ask your assistant things like:
 
@@ -9,10 +10,12 @@ Ask your assistant things like:
 - "What did the latest five videos of @mkbhd cover, and which got the most views?"
 - "Find this week's most viewed videos about web scraping."
 - "What are people saying in the comments of this video?"
+- "Find the contact email and the LinkedIn page of apify.com."
+- "What are the brand colors and the font of stripe.com?"
 
 ## Without installing anything
 
-The same seven tools are also served from a hosted MCP server at `https://pipefetch.com/mcp`. If your
+The same tools are also served from a hosted MCP server at `https://pipefetch.com/mcp`. If your
 tool can connect to a remote server over HTTP, point it there and send your key in the `x-api-key`
 header. In Claude Code:
 
@@ -52,7 +55,7 @@ Use this package when your tool starts MCP servers as a local program, as Claude
 claude mcp add --env PIPEFETCH_API_KEY=pf_your_key --transport stdio pipefetch -- npx -y pipefetch-mcp
 ```
 
-Restart the tool afterwards. The seven tools below should appear in its tool list.
+Restart the tool afterwards. The tools below should appear in its tool list.
 
 ## Tools
 
@@ -65,14 +68,18 @@ Restart the tool afterwards. The seven tools below should appear in its tool lis
 | `youtube_channel_shorts` | The latest Shorts of a channel, up to 40 | 1 |
 | `youtube_search` | Search results, up to 40, with sorting and upload-date filters | 1 |
 | `youtube_comments` | Top or newest comments of a video, up to 100 | 1 per started 20 |
+| `website_contacts` | The emails, phone numbers and social profiles a website publishes, its contact page and address | 1 |
+| `website_brand` | A company's name, logo, icon, brand colors, fonts and social profiles, from its website | 1 |
 
 All tools only read public data. Videos can be given as an ID or any YouTube URL; channels as a
-handle (`@mkbhd`), a channel ID or a channel URL.
+handle (`@mkbhd`), a channel ID or a channel URL; websites as a domain (`stripe.com`) or any address on
+the site.
 
 ## What it costs
 
 Each tool call is one Pipefetch request and uses credits from your account: usually 1. Requests
-that find nothing (a video without captions, an empty search, comments turned off) cost nothing.
+that find nothing (a video without captions, an empty search, comments turned off, a website that
+cannot be read or shows no contacts) cost nothing.
 Credits are prepaid, from $9 for 3,000, and never expire. See [pricing](https://pipefetch.com/pricing).
 
 An assistant can make several calls for one question. "Compare the last ten videos of this channel"
@@ -80,7 +87,7 @@ is one call for the list; reading all ten transcripts would be ten more.
 
 ## Good to know
 
-- Every answer is fetched live from YouTube, so a call takes a few seconds.
+- Every answer is fetched live from YouTube or from the website you name, so a call takes a few seconds.
 - A transcript exists only if the video has captions, uploaded or automatic.
 - Lists are one page: the latest 30 uploads, up to 40 search results, up to 100 comments.
 - Your API key stays on your computer, in your tool's configuration. Anyone who has it can spend
