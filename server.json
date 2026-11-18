@@ -2,13 +2,13 @@
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "io.github.pipefetch/pipefetch-mcp",
   "title": "Pipefetch",
-  "description": "YouTube transcripts, videos, search and comments, website contacts and brands, Instagram profiles.",
+  "description": "Public web data as tools: video platforms, social networks and company websites.",
   "websiteUrl": "https://pipefetch.com",
   "repository": {
     "url": "https://github.com/pipefetch/pipefetch-mcp",
     "source": "github"
   },
-  "version": "0.3.0",
+  "version": "0.4.0",
   "remotes": [
     {
       "type": "streamable-http",
@@ -27,7 +27,7 @@
     {
       "registryType": "npm",
       "identifier": "pipefetch-mcp",
-      "version": "0.3.0",
+      "version": "0.4.0",
       "transport": {
         "type": "stdio"
       },

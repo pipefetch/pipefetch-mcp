@@ -1,8 +1,9 @@
 # pipefetch-mcp
 
-An MCP server that gives Claude, Cursor and other AI tools access to YouTube (transcripts, video
-details, channels, search and comments), to what a company's website publishes (its contact details
-and its brand) and to public Instagram profiles. It uses the [Pipefetch API](https://pipefetch.com).
+An MCP server that gives Claude, Cursor and other AI tools public web data as tools: video platforms,
+social networks and company websites, read live when the assistant asks. It uses the
+[Pipefetch API](https://pipefetch.com), and it offers every endpoint Pipefetch has: the list of tools
+comes from pipefetch.com when the server starts, so new ones appear without updating this package.
 
 Ask your assistant things like:
 
@@ -60,6 +61,9 @@ Restart the tool afterwards. The tools below should appear in its tool list.
 
 ## Tools
 
+One tool per Pipefetch endpoint. The current list is always at
+[pipefetch.com/#apis](https://pipefetch.com/#apis); when this was written it was:
+
 | Tool | What it returns | Credits |
 |---|---|---|
 | `youtube_transcript` | The transcript of a video as text, with title, channel, length and chapters. Optional time markers. | 1 |
@@ -90,14 +94,14 @@ is one call for the list; reading all ten transcripts would be ten more.
 
 ## Good to know
 
-- Every answer is fetched live from YouTube, Instagram or the website you name, so a call takes a few
-  seconds.
+- Every answer is fetched live from its source, so a call takes a few seconds.
+- The tools come from pipefetch.com, so this server needs the internet to list them.
 - A transcript exists only if the video has captions, uploaded or automatic.
 - Lists are one page: the latest 30 uploads, up to 40 search results, up to 100 comments.
 - Your API key stays on your computer, in your tool's configuration. Anyone who has it can spend
   its credits.
-- Pipefetch is an independent service. It is not affiliated with, endorsed by or sponsored by
-  YouTube, Google, Instagram or Meta.
+- Pipefetch is an independent service. It is not affiliated with, endorsed by or sponsored by the
+  sites it reads or their owners.
 
 ## Links
 
