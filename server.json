@@ -1,0 +1,44 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.pipefetch/pipefetch-mcp",
+  "title": "Pipefetch",
+  "description": "YouTube transcripts, video details, channels, search and comments as tools.",
+  "websiteUrl": "https://pipefetch.com",
+  "repository": {
+    "url": "https://github.com/pipefetch/pipefetch-mcp",
+    "source": "github"
+  },
+  "version": "0.1.0",
+  "remotes": [
+    {
+      "type": "streamable-http",
+      "url": "https://pipefetch.com/mcp",
+      "headers": [
+        {
+          "name": "x-api-key",
+          "description": "Your Pipefetch API key (starts with pf_). Create one at https://pipefetch.com/dashboard",
+          "isRequired": true,
+          "isSecret": true
+        }
+      ]
+    }
+  ],
+  "packages": [
+    {
+      "registryType": "npm",
+      "identifier": "pipefetch-mcp",
+      "version": "0.1.0",
+      "transport": {
+        "type": "stdio"
+      },
+      "environmentVariables": [
+        {
+          "name": "PIPEFETCH_API_KEY",
+          "description": "Your Pipefetch API key (starts with pf_). Create one at https://pipefetch.com/dashboard",
+          "isRequired": true,
+          "isSecret": true
+        }
+      ]
+    }
+  ]
+}

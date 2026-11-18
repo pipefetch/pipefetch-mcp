@@ -2,6 +2,7 @@
   "name": "pipefetch-mcp",
   "version": "0.1.0",
   "description": "MCP server for the Pipefetch API: YouTube transcripts, video details, channels, search and comments for Claude, Cursor and other AI tools.",
+  "mcpName": "io.github.pipefetch/pipefetch-mcp",
   "type": "module",
   "bin": {
     "pipefetch-mcp": "src/server.js"
